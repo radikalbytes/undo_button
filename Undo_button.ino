@@ -1,77 +1,82 @@
-#include <FastLED.h>
-#define DATA_PIN    0
-#define LED_TYPE    WS2812
-#define COLOR_ORDER GRB
-#define NUM_LEDS   2
+#include <Adafruit_NeoPixel.h>
+// Which pin on the Arduino is connected to the NeoPixels?
+#define PIN            0
 
-#define BRIGHTNESS  255
-#include "DigiKeyboard.h"  // Include Library for Keyboard Emulation / Before verifying the code , change the board to Digispark default .
+// How many NeoPixels are attached to the Arduino?
+#define NUMPIXELS      2
 
 #define  _interval  60000
-#define _refresh 5000 
-#define Purple 0x800080
 
-void put_color(int32_t __color);
+// When we setup the NeoPixel library, we tell it how many pixels, and which pin to use to send signals.
+// Note that for older NeoPixel strips you might need to change the third parameter--see the strandtest
+// example for more information on possible values.
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_RGB + NEO_KHZ800);
 
-int buttonPin = 1;   
-// variables will change:
-int buttonState = 0;         // variable for reading the pushbutton status
-int32_t _color = 0x008000;
-CRGB leds[NUM_LEDS];
+#include <TrinketKeyboard.h>
 
+#define buttonPin 1
+
+void put_color(int _r, int _g, int _b);
+
+int __r = 0, __g = 250, __b = 0;
 unsigned long time1 = 0,time2 = 0;
 
-void setup() {
-
+void setup()
+{
   // initialize the pushbutton pin as an input:
   pinMode(buttonPin, INPUT);
 
-  FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  FastLED.setBrightness(BRIGHTNESS); 
+  // start USB stuff
+  TrinketKeyboard.begin();
+  pixels.begin(); // This initializes the NeoPixel library.
 
-  put_color(_color);
+  put_color(__r, __g, __b);
+
   time1 = millis();
-
 }
 
-void loop() {
+void loop()
+{
+  TrinketKeyboard.poll();
+  // the poll function must be called at least once every 10 ms
+  // or cause a keystroke
+  // if it is not, then the computer may think that the device
+  // has stopped working, and give errors
 
-  // read the state of the pushbutton value:
-  buttonState = digitalRead(buttonPin);
-
-  // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
-  if (buttonState == HIGH) {
-    // turn LED on:
-    DigiKeyboard.sendKeyStroke(0);
-    if (_color < 0x800000) {
-        _color = _color + 0x080000;
-        _color = _color - 0x000800;
+  if (digitalRead(buttonPin) == HIGH)
+  {
+    TrinketKeyboard.pressKey(KEYCODE_MOD_LEFT_GUI, KEYCODE_Z);
+    // this should type a CTRL+Z
+    TrinketKeyboard.pressKey(0, 0);
+    // this releases the key
+    put_color(250,0,250); 
+    if (__g > 0) {
+        __r = __r + 25;
+        __g = __g - 25;
     }
-
-    DigiKeyboard.sendKeyStroke(KEY_Z , MOD_GUI_LEFT);
-    
-    put_color(Purple); 
-    DigiKeyboard.delay(200);
-    put_color(_color); 
-
+    for (int _pollDelay = 0; _pollDelay < 40; _pollDelay++){
+        delay(5);
+        TrinketKeyboard.poll(); 
+    }
+    put_color(__r, __g, __b); 
   }
-  
   time2 = millis(); 
   if (time2 > (time1 + _interval)){
     time1 = millis();
-    DigiKeyboard.sendKeyStroke(0);
-    if (_color > 0x008000) {
-        _color = _color - 0x080000;
-        _color = _color + 0x000800;
-        put_color(_color);
+    if (__r > 0) {
+        __r = __r - 25;
+        __g = __g + 25;
+        put_color(__r, __g, __b);
     }
     
   }
-  
 }
 
-void put_color(int32_t __color){
-    leds[0] = __color;
-    leds[1] = __color;
-    FastLED.show(); 
+void put_color(int _r, int _g, int _b){
+  for(int i=0;i<NUMPIXELS;i++){
+    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+    pixels.setPixelColor(i, pixels.Color(_g,_r,_b)); // Moderately bright green color.
+    pixels.show(); // This sends the updated pixel color to the hardware.
+    //delay(delayval); // Delay for a period of time (in milliseconds).
+  }
 }
