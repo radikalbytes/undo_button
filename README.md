@@ -1,4 +1,4 @@
-#UNDO Big Button
+# UNDO Big Button
 ![image1](./images/IMG_6554.JPG)
 Hello there!
 
@@ -24,14 +24,14 @@ It's simple:
 * Old spring
 * Some double side tape
 
-##Electronics
+## Electronics
 
 ![image1](./images/IMG_6423.JPG)
 The WS2812 are conected serially (Attiny_Pin0 -> Din1 -> Dout1 -> Din2)
 
 Microswitch is conected with a GND pulldown resistor to Attiny_Pin1
 
-##3D printed parts
+## 3D printed parts
 ![image2](./images/IMG_6424.JPG)
 I used a [Big button](https://www.thingiverse.com/thing:379920) model from [rmd6502](https://www.thingiverse.com/rmd6502/about) thingiverse user whit some modifications at cap button file adding 3D UNDO text over it.
 
@@ -39,7 +39,7 @@ The file is [here](pulsador.stl) in stl format.
 
 You can mount button with a rubbish spring or without it. I had one in my trash components box :)
 
-##Software
+## Software
 Only need to program attiny with your Arduino environment. 
 
 Don't forget:
